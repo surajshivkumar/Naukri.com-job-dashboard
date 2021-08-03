@@ -1,0 +1,611 @@
+<style>
+  body {
+    background: #f2f2f4 !important;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif !important;
+  }
+  
+  .tile {
+    background: #fefdff;
+    /* padding: 2rem 1rem; */
+    min-width: 200px;
+    min-height: 100px;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    /* padding: 0.5rem 3rem 1.5rem 3rem; */
+  }
+
+  .tile h2 {
+    font-size: 1.1rem;
+  }
+
+  .divider {
+    height: 1px;
+    width:100%;
+    display:block; /* for use on default inline elements like span */
+    margin: 9px 0;
+    overflow: hidden;
+    background-color: #e5e5e5;
+  }
+
+.chart {
+    width: 300px;
+    height: 300px
+  }
+
+
+  /* @import url('https://fonts.googleapis.com/css?family=Roboto:100,100i,300,300i,400,400i,500,500i,700,700i'); */
+/* body {
+  background-color: #e0e0e0;
+  font: 14px Arial;
+  padding: 15px;
+} */
+/* select, input {
+  font: 14px Arial;
+}
+h3 {
+  font-size: 16px;
+  margin: 15px 0 4px 0;
+  padding: 0;
+}
+.first-h3 {
+  margin-top: 0;
+}
+fieldset {
+  float: left;
+  padding: 15px;
+  margin: 0;
+  background-color: white;
+  border: 1px solid #bbb;
+}
+legend {
+  background-color: white;
+  padding: 3px 8px;
+  border: 1px solid #bbb;
+}
+#container {
+  width: 960px;  
+  margin: 0 auto;
+  background-color: #e0e0e0;
+}
+.bubble-label {
+  text-align: center;
+  font-family: Roboto, Arial;
+  font-weight: 400;
+  line-height: 1.2;
+  cursor: default;
+  user-select: none;
+}
+.bubble-value {
+  color: rgba(255,255,255,0.8);
+  font-weight: 300;
+  cursor: default;
+  user-select: none;
+}
+button {
+  clear: left;
+  float: left;
+  font-size: 16px;
+  margin-top: 10px;
+  border-radius: 5px;
+  padding: 8px 15px;
+  background-color: white;
+  border: 1px solid #bbb;
+}
+
+
+text {
+  fill: #fff;
+  transition: all 0.3s;
+  text-overflow: ellipsis;
+}
+
+.label {
+  fill: #000;
+} */
+
+/* .chart {
+  margin: 0 auto;
+  max-width: 675px;
+  max-height: 675px;
+}
+
+.chart-svg {
+  width: 100%;
+  height: 100%;
+} */
+
+.node {
+  cursor: default;
+  @for $i from 1 through 30 {
+    &:nth-child(#{$i}) .graph {
+      $delay: $i * 0.033s;
+      animation-delay: $delay;
+    }
+  }
+}
+.node circle {
+  transition: transform 200ms ease-in-out;
+}
+.node:hover circle {
+  transform: scale(1.05);
+}
+
+.graph {
+  opacity: 0;
+  animation-name: animateIn;
+  animation-duration: 900ms;
+  animation-fill-mode: forwards;
+  animation-timing-function: cubic-bezier(.7,.85,.41,1.21);
+}
+
+@keyframes animateIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.5) rotate(-8deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+  }
+}
+
+
+.d3-tip-outer {
+  position: relative;
+}
+.d3-tip {
+  font-family: Roboto, sans-serif;
+  font-size: 18px;
+  font-weight: 100;
+  line-height: 1;
+  padding: 16px 20px;
+  /* background: rgba(0, 0, 0, 0.8); */
+  color: #fff;
+  border-radius: 6px;
+}
+.d3-stem {
+  width: 0;
+	height: 0;
+	position: absolute;
+	bottom: -45px;
+	left: 55%;
+	border-style: solid;
+	border-width: 48px 15px 0 0;
+	transform: rotate(17deg);
+	transform-origin: 100% 0;
+	z-index: 2;
+}
+
+ .d3-tip:after {
+   box-sizing: border-box;
+   display: inline;
+   font-size: 10px;
+   width: 100%;
+   line-height: 1;
+   color: rgba(0, 0, 0, 0.8);
+   content: "\25BC";
+   position: absolute;
+   text-align: center;
+ }
+
+ .d3-tip.n:after {
+   margin: -1px 0 0 0;
+   top: 100%;
+   left: 0;
+ } 
+
+
+
+
+</style>
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+
+{% block body %}<body>{% endblock %}
+{% block content %}
+<div class="row mt-3">
+  <div class="col-md-5 d-flex flex-column">
+    <div class="d-flex justify-content-center">
+      <div class="tile me-5">
+        <h2>Open Positions</h2>
+        <hr class="divider">
+        <p id="positions"></p>
+      </div>
+      <div class="tile">
+        <h2>Available Roles</h2>
+        <p id="roles"></p>
+      </div>
+    </div>
+    
+    <div class="mt-5">
+      <fieldset style="display: none;">
+        <legend>Graph Options</legend>
+        <h3 class=first-h3>Number of Bubbles to show</h3>
+        <div><select id=limit></select></div>
+        <h3>Order</h3>  
+        <select id=shuffle>
+          <option value="0">Largest to smallest</option>
+          <option value="1">Random</option>
+        </select>
+        <h3>Bg Color</h3>  
+        <select id=bg>
+          <option value="#e0e0e0">Gray</option>
+          <option value="#eeeeee">Gray 2</option>
+          <option value="#111111">Dark</option>
+        </select>
+      </fieldset>
+      
+      <div id="chart" class="col-md-6 bubble-chart"></div>
+    </div>
+  </div>  
+  <div class="col-md-7">
+    <div class="d-flex flex-column justify-content-between align-items-center">
+      <h3 align="center">Relavance</h3>
+      <div class="chart">
+        <canvas id="oilChart" width="100" height="100"></canvas>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-6">
+        <div>
+          <h3 align="center">Annunal Salaries</h3>
+          <div id="my_dataviz"></div>
+        </div>
+      </div>  
+      <div class="col-md-6">
+        <h3 align="center">Experience</h3>
+        <div id="experience"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+<!-- <div class="row mt-5">
+
+  <div class="col-md-6">
+
+  </div>
+</div> -->
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://d3js.org/d3.v4.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3-tip/0.7.1/d3-tip.min.js"></script>
+<script>
+    let text = {{title|tojson}}
+    let loc = {{location|tojson}}
+    let experience = {{exp|tojson}};
+    let pie = {{pieData|tojson}};
+    let pos = {{openings|tojson}};
+    let role = {{positions|tojson}};
+    let skill = {{skills|tojson}};
+    let pieLabels = pie.labels;
+    console.log('PIE VALUE', pie.values);
+    let pieValues = pie.values;
+
+    let positionsID = document.getElementById('positions');
+    let rolesID = document.getElementById('roles');
+
+    positionsID.textContent = pos;
+    rolesID.textContent = role;
+    
+    console.log('EX', experience);
+    console.log(text, loc);
+    console.log('PewDiePie', pie);
+    console.log('positions', role);
+    console.log('openings', pos);
+    console.log('skills', skill);
+
+</script>
+<script>
+  // set the dimensions and margins of the graph
+  var margin = {top: 10, right: 30, bottom: 30, left: 40},
+  width = 460 - margin.left - margin.right,
+  height = 300 - margin.top - margin.bottom;
+  
+  // append the svg object to the body of the page
+  var svg = d3.select("#my_dataviz")
+  .append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+      .attr("transform",
+            "translate(" + margin.left + "," + margin.top + ")");
+  
+  // get the data
+  d3.csv("../static/salary.csv", function(data) {
+    console.log(data);
+  
+    // X axis: scale and draw:
+    var x = d3.scaleLinear()
+      .domain([0, 800000])     // can use this instead of 1000 to have the max of data: d3.max(data, function(d) { return +d.price })
+      .range([0, width]);
+    svg.append("g")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x));
+    
+    // set the parameters for the histogram
+    var histogram = d3.histogram()
+        .value(function(d) { return d.Salary; })   // I need to give the vector of value
+        .domain(x.domain())  // then the domain of the graphic
+        .thresholds(x.ticks(10)); // then the numbers of bins
+    // And apply this function to data to get the bins
+    var bins = histogram(data);
+  
+    // Y axis: scale and draw:
+    var y = d3.scaleLinear()
+        .range([height, 0]);
+        y.domain([0, d3.max(bins, function(d) { return d.length; })]);   // d3.hist has to be called before the Y axis obviously
+    svg.append("g")
+        .call(d3.axisLeft(y));
+  
+    // append the bar rectangles to the svg element
+    svg.selectAll("rect")
+        .data(bins)
+        .enter()
+        .append("rect")
+          .attr("x", 1)
+          .attr("transform", function(d) { return "translate(" + x(d.x0) + "," + y(d.length) + ")"; })
+          .attr("width", function(d) { return x(d.x1) - x(d.x0) -1 ; })
+          .attr("height", function(d) { return height - y(d.length); })
+          .style("fill", "#69b3a2")
+  
+  });
+  </script>
+  <script>
+    // set the dimensions and margins of the graph
+    var margin2 = {top: 10, right: 30, bottom: 30, left: 40},
+    width2 = 400 - margin2.left - margin2.right,
+    height2 = 300 - margin2.top - margin2.bottom;
+
+    // append the svg object to the body of the page
+    var svg2 = d3.select("#experience")
+    .append("svg")
+    .attr("width", width2 + margin2.left + margin2.right)
+    .attr("height", height2 + margin2.top + margin2.bottom)
+    .append("g")
+    .attr("transform",
+      "translate(" + margin2.left + "," + margin2.top + ")");
+
+    // create dummy data
+    // var data = [4, 7, 7, 12, 0, 4, 0, 5, 2, 4, 3, 6, 8, 13, 3, 5, 5, 10, 3, 7, 4, 7, 1, 2, 4, 9, 5, 10, 1, 2, 1, 3, 0, 2, 3, 4, 3, 4];
+    // console.log('DATA: ', data);
+
+    // Compute summary statistics used for the box:
+    var data_sorted = experience.sort(d3.ascending)
+    var q1 = d3.quantile(data_sorted, .25)
+    var median = d3.quantile(data_sorted, .5)
+    var q3 = d3.quantile(data_sorted, .75)
+    var interQuantileRange = q3 - q1
+    var min = ( q1 - 1.5 * interQuantileRange ) * 0;
+    var max = q1 + 1.5 * interQuantileRange
+    console.log('MIN and Max for experience', min, max)
+
+    // Show the Y scale
+    var y = d3.scaleLinear()
+    .domain([0,max])
+    .range([height, 0]);
+    svg2.call(d3.axisLeft(y))
+
+    // a few features for the box
+    var centerBoxPlot = 200
+    var widthBoxPlot = 100
+
+    // Show the main vertical line
+    svg2
+    .append("line")
+    .attr("x1", centerBoxPlot)
+    .attr("x2", centerBoxPlot)
+    .attr("y1", y(min) )
+    .attr("y2", y(max) )
+    .attr("stroke", "black")
+
+    // Show the box2
+    svg2
+    .append("rect")
+    .attr("x", centerBoxPlot - widthBoxPlot/2)
+    .attr("y", y(q3) )
+    .attr("height", (y(q1)-y(q3)) )
+    .attr("width", widthBoxPlot )
+    .attr("stroke", "black")
+    .style("fill", "#69b3a2")
+
+    // show median, min and max horizontal lines
+    svg2
+    .selectAll("toto")
+    .data([min, median, max])
+    .enter()
+    .append("line")
+    .attr("x1", centerBoxPlot-widthBoxPlot/2)
+    .attr("x2", centerBoxPlot+widthBoxPlot/2)
+    .attr("y1", function(d){ return(y(d))} )
+    .attr("y2", function(d){ return(y(d))} )
+    .attr("stroke", "black")
+  </script>
+  <script>
+    var oilCanvas = document.getElementById("oilChart");
+
+    // Chart.defaults.global.defaultFontFamily = "Lato";
+    // Chart.defaults.global.defaultFontSize = 12;
+    var oilData = {
+      labels: pieLabels,
+      datasets: [{
+        data: pieValues,
+        backgroundColor: [
+          "#FF6384",
+          "#84FF63",
+          "#6384FF"
+        ]
+      }]
+    };
+
+    var pieChart = new Chart(oilCanvas, {
+    type: 'pie',
+    data: oilData
+    });
+  </script>
+
+  <script>
+    const defaultLimit = 20;
+
+// setup controls
+const satInput = document.querySelector('#sat');
+const lumInput = document.querySelector('#lum');
+const limitSelect = document.querySelector('#limit');
+const shuffleSelect = document.querySelector('#shuffle');
+const options = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25];
+options.forEach((val, i) => limitSelect.options[i] = new Option(val));
+limitSelect.selectedIndex = defaultLimit - 1;
+const bgSelect = document.querySelector('#bg');
+bgSelect.selectedIndex = 0;
+limitSelect.addEventListener('change', render);
+bgSelect.addEventListener('change', render);
+shuffleSelect.addEventListener('change', render);
+
+render();
+
+function render() {
+  let idx = 0;
+  const limit = limitSelect.selectedIndex + 1;
+  const bgColor = bgSelect.options[bgSelect.selectedIndex].value;
+  const doShuffle = shuffleSelect.selectedIndex === 1;
+  document.querySelector('#chart').innerHTML = '';
+  
+var json = {
+  'children': skill.slice(0, limit)
+}
+if (doShuffle) {
+  json.children = _.shuffle(json.children);  
+}
+const values = json.children.map(d => d.value);
+const min = Math.min.apply(null, values);
+const max = Math.max.apply(null, values);
+const total = json.children.length;
+
+document.body.style.backgroundColor = bgColor;  
+  
+var diameter = 600,
+    color = d3.scaleOrdinal(d3.schemeCategory20c);
+
+var bubble = d3.pack()
+  .size([diameter, diameter])
+  .padding(0);
+
+var tip = d3.tip()
+  .attr('class', 'd3-tip-outer')
+  .offset([-38, 0])
+  .html((d, i) => {
+    const item = json.children[i];
+    const color = getColor(i, values.length);
+    return `<div class="d3-tip" style="background-color: ${color}">${item.name} (${item.value})</div><div class="d3-stem" style="border-color: ${color} transparent transparent transparent"></div>`;
+  });
+  
+var margin = {
+  left: 25,
+  right: 25,
+  top: 25,
+  bottom: 25
+}
+
+var svg = d3.select('#chart').append('svg')
+  .attr('viewBox','0 0 ' + (diameter + margin.right) + ' ' + diameter)
+  .attr('width', (diameter + margin.right))
+  .attr('height', diameter)
+  .attr('class', 'chart-svg');
+
+var root = d3.hierarchy(json)
+  .sum(function(d) { return d.value; });
+  // .sort(function(a, b) { return b.value - a.value; });
+
+bubble(root);
+
+var node = svg.selectAll('.node')
+  .data(root.children)
+  .enter()
+  .append('g').attr('class', 'node')
+  .attr('transform', function(d) { return 'translate(' + d.x + ' ' + d.y + ')'; })
+  .append('g').attr('class', 'graph');
+
+node.append("circle")
+  .attr("r", function(d) { return d.r; })
+  .style("fill", getItemColor)
+  .on('mouseover', tip.show)
+  .on('mouseout', tip.hide);
+
+node.call(tip);
+  
+node.append("text")
+  .attr("dy", "0.2em")
+  .style("text-anchor", "middle")
+  .style('font-family', 'Roboto')
+  .style('font-size', getFontSizeForItem)
+  .text(getLabel)
+  .style("fill", "#ffffff")
+  .style('pointer-events', 'none');
+
+node.append("text")
+  .attr("dy", "1.3em")
+  .style("text-anchor", "middle")
+  .style('font-family', 'Roboto')
+  .style('font-weight', '100')
+  .style('font-size', getFontSizeForItem)
+  .text(getValueText)
+  .style("fill", "#ffffff")
+  .style('pointer-events', 'none');  
+  
+function getItemColor(item) {
+  return getColor(idx++, json.children.length);
+}
+function getColor(idx, total) {
+  const colorList = ['F05A24','EF4E4A','EE3F65','EC297B','E3236C','D91C5C','BC1E60','9E1F63','992271','952480','90278E','7A2A8F','652D90','502980','3B2671','262261','27286D','292D78','2A3384','2B388F','2A4F9F','2965AF','277CC0','2692D0','25A9E0'];
+  const colorLookup = [
+    [0,4,10,18,24],
+    [0,3,6,9,11,13,15,18,20,24],
+    [0,3,4,6,7,9,11,13,14,15,17,18,20,22,24],
+    [0,2,3,4,6,7,8,9,11,12,13,14,15,17,18,19,20,22,23,24],
+    [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24],
+  ];  
+  for (const idxList of colorLookup) {
+    if (idxList.length >= total) {
+      return '#' + colorList[idxList[idx]];
+    }
+  }
+}
+
+  function getLabel(item) {
+    if (item.data.value < max / 3.3) {
+      return '';
+    }
+    return truncate(item.data.name);
+  }
+  function getValueText(item) {
+    if (item.data.value < max / 3.3) {
+      return '';
+    }
+    return item.data.value;
+  }
+  function truncate(label) {
+    const max = 11;
+    if (label.length > max) {
+      label = label.slice(0, max) + '...';
+    }
+    return label;
+  }
+  function getFontSizeForItem(item) {
+    return getFontSize(item.data.value, min, max, total);
+  }
+  function getFontSize(value, min, max, total) {
+    const minPx = 8;
+    const maxPx = 25;
+    const pxRange = maxPx - minPx;
+    const dataRange = max - min;
+    const ratio = pxRange / dataRange;
+    const size = Math.min(maxPx, Math.round(value * ratio) + minPx);
+    return `${size}px`;
+  }
+}
+  </script>
+
+{% endblock %}

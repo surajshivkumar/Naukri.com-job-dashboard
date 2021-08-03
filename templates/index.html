@@ -1,0 +1,38 @@
+<style>
+  .chart {
+    width: 300px;
+    height: 300px
+  }
+
+</style>
+
+
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+
+{% block content %}
+
+<script src='https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js'></script>
+<div class="container">
+  <h1 align="center" class="mt-5 mb-3">Job Postings</h1>
+  <form method="POST" action="/dashboard">
+    <div class="row mb-4">
+      <div class="col">
+        <div class="form-outline">
+          <input type="text" id="title" class="form-control" name="title"/>
+          <label class="form-label" for="form3Example1">Job Title</label>
+        </div>
+      </div>
+      <div class="col">
+        <div class="form-outline">
+          <input type="text" id="location" class="form-control" name="location" />
+          <label class="form-label" for="form3Example2">Location</label>
+        </div>
+      </div>
+    </div>
+  
+    <!-- Submit button -->
+    <button type="submit" class="btn btn-primary mb-4" >Submit</button>
+  </form>
+</div>
+{% endblock %}
